@@ -703,6 +703,10 @@ class SwipeActionCellState extends State<SwipeActionCell>
   }
 
   void _closeNestedAction() {
+    maxTrailingPullWidth =
+        whenLeadingActionShowing ? 0 : _getTrailingMaxPullWidth();
+    maxLeadingPullWidth =
+        whenTrailingActionShowing ? 0 : _getLeadingMaxPullWidth();
     if (trailingActionsCount > 0 &&
             widget.trailingActions?.first.nestedAction != null ||
         leadingActionsCount > 0 &&
