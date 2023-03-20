@@ -431,7 +431,7 @@ class SwipeActionCellState extends State<SwipeActionCell>
 
   void _addScrollListener() {
     if (widget.closeWhenScrolling) {
-      scrollPosition = Scrollable.of(context)?.position;
+      scrollPosition = Scrollable.of(context).position;
       scrollPosition?.isScrollingNotifier.addListener(_scrollListener);
     }
   }
@@ -569,10 +569,16 @@ class SwipeActionCellState extends State<SwipeActionCell>
             widget.leadingActions![0].performsFirstActionWithFullSwipe ||
         trailingActionsCount > 0 &&
             widget.trailingActions![0].performsFirstActionWithFullSwipe;
+    final bool deleteActionWhenFullSwipe = whenLeadingActionShowing &&
+            leadingActionsCount > 0 &&
+            widget.leadingActions![0].deleteActionWhenFullSwipe ||
+        trailingActionsCount > 0 &&
+            widget.trailingActions![0].deleteActionWhenFullSwipe &&
+            whenTrailingActionShowing;
 
     if (lastItemOut && canFullSwipe) {
       CompletionHandler completionHandler = (delete) async {
-        if (delete) {
+        if (delete && deleteActionWhenFullSwipe) {
           SwipeActionStore.getInstance()
               .bus
               .fire(IgnorePointerEvent(ignore: true));
@@ -1051,6 +1057,8 @@ class SwipeAction {
   /// 默认为false
   final bool performsFirstActionWithFullSwipe;
 
+  final bool deleteActionWhenFullSwipe;
+
   const SwipeAction({
     required this.onTap,
     this.title,
@@ -1060,6 +1068,7 @@ class SwipeAction {
     this.closeOnTap = true,
     this.backgroundRadius = 0.0,
     this.forceAlignmentToBoundary = false,
+    this.deleteActionWhenFullSwipe = true,
     this.widthSpace = 80,
     this.nestedAction,
     this.content,
