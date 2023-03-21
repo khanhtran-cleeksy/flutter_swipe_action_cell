@@ -78,7 +78,7 @@ class _SwipeActionPageState extends State<SwipeActionPage> {
     super.initState();
     controller = SwipeActionController(selectedIndexPathsChangeCallback:
         (changedIndexPaths, selected, currentCount) {
-      print(
+      debugPrint(
           'cell at ${changedIndexPaths.toString()} is/are ${selected ? 'selected' : 'unselected'} ,current selected count is $currentCount');
 
       /// I just call setState() to update simply in this example.
@@ -184,7 +184,7 @@ class _SwipeActionPageState extends State<SwipeActionPage> {
     return SwipeActionCell(
       controller: controller,
       index: index,
-
+      fullSwipeFactor: 0.35,
       // Required!
       key: ValueKey(list[index]),
 
@@ -193,28 +193,22 @@ class _SwipeActionPageState extends State<SwipeActionPage> {
       // deleteAnimationDuration: 400,
       selectedForegroundColor: Colors.black.withAlpha(30),
       trailingActions: [
-        SwipeAction(
-            title: "delete",
-            performsFirstActionWithFullSwipe: true,
-            nestedAction: SwipeNestedAction(title: "confirm"),
-            onTap: (handler) async {
-              await handler(true);
-
-              list.removeAt(index);
-              setState(() {});
-            }),
         SwipeAction(title: "action2", color: Colors.grey, onTap: (handler) {}),
+        SwipeAction(title: "action1", color: Colors.blue, onTap: (handler) {}),
       ],
       leadingActions: [
         SwipeAction(
-            title: "delete",
-            onTap: (handler) async {
-              await handler(true);
-              list.removeAt(index);
-              setState(() {});
-            }),
-        SwipeAction(
-            title: "action3", color: Colors.orange, onTap: (handler) {}),
+          title: "delete",
+          performsFirstActionWithFullSwipe: true,
+          deleteActionWhenFullSwipe: false,
+          onTap: (handler) async {
+            debugPrint('delete');
+            // list.removeAt(index);
+            setState(() {});
+            await handler(true);
+          },
+          closeOnTap: false,
+        ),
       ],
       child: GestureDetector(
         onTap: () {

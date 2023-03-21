@@ -15,6 +15,7 @@ import 'swipe_pull_button.dart';
 /// @created by 文景睿
 /// 2020 年 7月13日
 ///
+enum ActionShowing { leading, trailing, none }
 
 class SwipeActionCell extends StatefulWidget {
   /// Actions on trailing
@@ -180,6 +181,7 @@ class SwipeActionCellState extends State<SwipeActionCell>
 
   late bool whenTrailingActionShowing;
   late bool whenLeadingActionShowing;
+  late ActionShowing lastActionShowing;
 
   int get trailingActionsCount => widget.trailingActions?.length ?? 0;
 
@@ -431,7 +433,7 @@ class SwipeActionCellState extends State<SwipeActionCell>
 
   void _addScrollListener() {
     if (widget.closeWhenScrolling) {
-      scrollPosition = Scrollable.of(context)?.position;
+      scrollPosition = Scrollable.of(context).position;
       scrollPosition?.isScrollingNotifier.addListener(_scrollListener);
     }
   }
@@ -450,6 +452,12 @@ class SwipeActionCellState extends State<SwipeActionCell>
   }
 
   void _onHorizontalDragStart(DragStartDetails details) {
+    lastActionShowing = (whenTrailingActionShowing == false &&
+            whenLeadingActionShowing == false)
+        ? ActionShowing.none
+        : whenLeadingActionShowing
+            ? ActionShowing.leading
+            : ActionShowing.trailing;
     if (editing) return;
     //indicates this cell is opening
     SwipeActionStore.getInstance()
@@ -477,7 +485,10 @@ class SwipeActionCellState extends State<SwipeActionCell>
         trailingActionsCount > 0 &&
         widget.trailingActions![0].performsFirstActionWithFullSwipe;
 
-    if (leadingActionCanFullSwipe || trailingActionCanFullSwipe) {
+    if (leadingActionCanFullSwipe &&
+            lastActionShowing != ActionShowing.trailing ||
+        trailingActionCanFullSwipe &&
+            lastActionShowing != ActionShowing.leading) {
       _updateWithFullDraggableEffect(details);
     } else {
       _updateWithNormalEffect(details);
@@ -569,10 +580,16 @@ class SwipeActionCellState extends State<SwipeActionCell>
             widget.leadingActions![0].performsFirstActionWithFullSwipe ||
         trailingActionsCount > 0 &&
             widget.trailingActions![0].performsFirstActionWithFullSwipe;
+    final bool deleteActionWhenFullSwipe = whenLeadingActionShowing &&
+            leadingActionsCount > 0 &&
+            widget.leadingActions![0].deleteActionWhenFullSwipe ||
+        trailingActionsCount > 0 &&
+            widget.trailingActions![0].deleteActionWhenFullSwipe &&
+            whenTrailingActionShowing;
 
     if (lastItemOut && canFullSwipe) {
       CompletionHandler completionHandler = (delete) async {
-        if (delete) {
+        if (delete && deleteActionWhenFullSwipe) {
           SwipeActionStore.getInstance()
               .bus
               .fire(IgnorePointerEvent(ignore: true));
@@ -891,7 +908,7 @@ class SwipeActionCellState extends State<SwipeActionCell>
   }
 
   Widget _buildLeadingActionButtons() {
-    if (currentOffset.dx < 0) {
+    if (currentOffset.dx < 0 || lastActionShowing == ActionShowing.trailing) {
       return const SizedBox();
     }
     final List<Widget> actionButtons =
@@ -927,7 +944,7 @@ class SwipeActionCellState extends State<SwipeActionCell>
   }
 
   Widget _buildTrailingActionButtons() {
-    if (currentOffset.dx > 0) {
+    if (currentOffset.dx > 0 || lastActionShowing == ActionShowing.leading) {
       return const SizedBox();
     }
     final List<Widget> actionButtons =
@@ -1051,6 +1068,8 @@ class SwipeAction {
   /// 默认为false
   final bool performsFirstActionWithFullSwipe;
 
+  final bool deleteActionWhenFullSwipe;
+
   const SwipeAction({
     required this.onTap,
     this.title,
@@ -1060,6 +1079,7 @@ class SwipeAction {
     this.closeOnTap = true,
     this.backgroundRadius = 0.0,
     this.forceAlignmentToBoundary = false,
+    this.deleteActionWhenFullSwipe = true,
     this.widthSpace = 80,
     this.nestedAction,
     this.content,
