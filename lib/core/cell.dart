@@ -180,6 +180,7 @@ class SwipeActionCellState extends State<SwipeActionCell>
 
   late bool whenTrailingActionShowing;
   late bool whenLeadingActionShowing;
+  late bool? lastActionShowing;
 
   int get trailingActionsCount => widget.trailingActions?.length ?? 0;
 
@@ -450,6 +451,12 @@ class SwipeActionCellState extends State<SwipeActionCell>
   }
 
   void _onHorizontalDragStart(DragStartDetails details) {
+    lastActionShowing = (whenTrailingActionShowing == false &&
+            whenLeadingActionShowing == false)
+        ? null
+        : whenLeadingActionShowing
+            ? false
+            : whenTrailingActionShowing;
     if (editing) return;
     //indicates this cell is opening
     SwipeActionStore.getInstance()
@@ -477,7 +484,8 @@ class SwipeActionCellState extends State<SwipeActionCell>
         trailingActionsCount > 0 &&
         widget.trailingActions![0].performsFirstActionWithFullSwipe;
 
-    if (leadingActionCanFullSwipe || trailingActionCanFullSwipe) {
+    if (leadingActionCanFullSwipe && lastActionShowing != true ||
+        trailingActionCanFullSwipe && lastActionShowing != false) {
       _updateWithFullDraggableEffect(details);
     } else {
       _updateWithNormalEffect(details);
@@ -897,7 +905,7 @@ class SwipeActionCellState extends State<SwipeActionCell>
   }
 
   Widget _buildLeadingActionButtons() {
-    if (currentOffset.dx < 0) {
+    if (currentOffset.dx < 0 || lastActionShowing == true) {
       return const SizedBox();
     }
     final List<Widget> actionButtons =
@@ -933,7 +941,7 @@ class SwipeActionCellState extends State<SwipeActionCell>
   }
 
   Widget _buildTrailingActionButtons() {
-    if (currentOffset.dx > 0) {
+    if (currentOffset.dx > 0 || lastActionShowing == false) {
       return const SizedBox();
     }
     final List<Widget> actionButtons =
