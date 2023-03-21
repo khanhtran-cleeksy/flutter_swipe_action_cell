@@ -134,8 +134,9 @@ class _SwipePullAlignButtonState extends State<SwipePullAlignButton>
   }
 
   void _initCompletionHandler() {
+    final bool deleteActionWhenFullSwipe = action.deleteActionWhenFullSwipe;
     handler = (delete) async {
-      if (delete) {
+      if (delete && deleteActionWhenFullSwipe) {
         SwipeActionStore.getInstance()
             .bus
             .fire(IgnorePointerEvent(ignore: true));
