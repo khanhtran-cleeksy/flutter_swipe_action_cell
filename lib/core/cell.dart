@@ -15,6 +15,7 @@ import 'swipe_pull_button.dart';
 /// @created by 文景睿
 /// 2020 年 7月13日
 ///
+enum ActionShowing { leading, trailing, none }
 
 class SwipeActionCell extends StatefulWidget {
   /// Actions on trailing
@@ -180,7 +181,7 @@ class SwipeActionCellState extends State<SwipeActionCell>
 
   late bool whenTrailingActionShowing;
   late bool whenLeadingActionShowing;
-  late bool? lastActionShowing;
+  late ActionShowing lastActionShowing;
 
   int get trailingActionsCount => widget.trailingActions?.length ?? 0;
 
@@ -453,10 +454,10 @@ class SwipeActionCellState extends State<SwipeActionCell>
   void _onHorizontalDragStart(DragStartDetails details) {
     lastActionShowing = (whenTrailingActionShowing == false &&
             whenLeadingActionShowing == false)
-        ? null
+        ? ActionShowing.none
         : whenLeadingActionShowing
-            ? false
-            : whenTrailingActionShowing;
+            ? ActionShowing.leading
+            : ActionShowing.trailing;
     if (editing) return;
     //indicates this cell is opening
     SwipeActionStore.getInstance()
@@ -484,8 +485,10 @@ class SwipeActionCellState extends State<SwipeActionCell>
         trailingActionsCount > 0 &&
         widget.trailingActions![0].performsFirstActionWithFullSwipe;
 
-    if (leadingActionCanFullSwipe && lastActionShowing != true ||
-        trailingActionCanFullSwipe && lastActionShowing != false) {
+    if (leadingActionCanFullSwipe &&
+            lastActionShowing != ActionShowing.trailing ||
+        trailingActionCanFullSwipe &&
+            lastActionShowing != ActionShowing.leading) {
       _updateWithFullDraggableEffect(details);
     } else {
       _updateWithNormalEffect(details);
@@ -905,7 +908,7 @@ class SwipeActionCellState extends State<SwipeActionCell>
   }
 
   Widget _buildLeadingActionButtons() {
-    if (currentOffset.dx < 0 || lastActionShowing == true) {
+    if (currentOffset.dx < 0 || lastActionShowing == ActionShowing.trailing) {
       return const SizedBox();
     }
     final List<Widget> actionButtons =
@@ -941,7 +944,7 @@ class SwipeActionCellState extends State<SwipeActionCell>
   }
 
   Widget _buildTrailingActionButtons() {
-    if (currentOffset.dx > 0 || lastActionShowing == false) {
+    if (currentOffset.dx > 0 || lastActionShowing == ActionShowing.leading) {
       return const SizedBox();
     }
     final List<Widget> actionButtons =

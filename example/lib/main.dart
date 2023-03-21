@@ -202,7 +202,7 @@ class _SwipeActionPageState extends State<SwipeActionPage> {
           performsFirstActionWithFullSwipe: true,
           deleteActionWhenFullSwipe: false,
           onTap: (handler) async {
-            print('delete');
+            debugPrint('delete');
             // list.removeAt(index);
             setState(() {});
             await handler(true);
