@@ -103,6 +103,9 @@ class SwipeActionCell extends StatefulWidget {
   /// 当选中cell的时候的一个前景蒙版颜色，默认为Colors.black.withAlpha(30)
   final Color? selectedForegroundColor;
 
+  final Function()? onHorizontalStartDrag;
+  final Function()? onHorizontalEndDrag;
+
   /// ## About [key] / 关于[key]
   /// You should put a key,like [ValueKey] or [ObjectKey]
   /// don't use [GlobalKey] or [UniqueKey]
@@ -119,6 +122,8 @@ class SwipeActionCell extends StatefulWidget {
     this.trailingActions,
     this.leadingActions,
     this.isDraggable = true,
+    this.onHorizontalStartDrag,
+    this.onHorizontalEndDrag,
     this.closeWhenScrolling = true,
     this.firstActionWillCoverAllSpaceOnDeleting = true,
     this.controller,
@@ -452,6 +457,7 @@ class SwipeActionCellState extends State<SwipeActionCell>
   }
 
   void _onHorizontalDragStart(DragStartDetails details) {
+    widget.onHorizontalStartDrag?.call();
     lastActionShowing = (whenTrailingActionShowing == false &&
             whenLeadingActionShowing == false)
         ? ActionShowing.none
@@ -703,6 +709,7 @@ class SwipeActionCellState extends State<SwipeActionCell>
     //when close animation is running,ignore action button hit test
     ignoreActionButtonHit = true;
     _resetAnimValue();
+    widget.onHorizontalEndDrag?.call();
     if (mounted) {
       animation =
           Tween<double>(begin: currentOffset.dx, end: 0.0).animate(curvedAnim)
