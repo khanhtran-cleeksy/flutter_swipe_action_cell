@@ -187,7 +187,12 @@ class _SwipeActionPageState extends State<SwipeActionPage> {
       fullSwipeFactor: 0.35,
       // Required!
       key: ValueKey(list[index]),
-
+      onHorizontalStartDrag: () {
+        print(1);
+      },
+      onHorizontalEndDrag: () {
+        print(2);
+      },
       // Animation default value below
       // normalAnimationDuration: 400,
       // deleteAnimationDuration: 400,

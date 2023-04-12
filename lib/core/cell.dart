@@ -624,6 +624,8 @@ class SwipeActionCellState extends State<SwipeActionCell>
     } else {
       /// normal dragging update
       if (details.velocity.pixelsPerSecond.dx < 0.0) {
+        if (lastActionShowing == ActionShowing.leading)
+          widget.onHorizontalEndDrag?.call();
         if (!whenLeadingActionShowing && hasTrailingAction) {
           _open(trailing: true);
         } else {
@@ -631,6 +633,8 @@ class SwipeActionCellState extends State<SwipeActionCell>
         }
         return;
       } else if (details.velocity.pixelsPerSecond.dx > 0.0) {
+        if (lastActionShowing == ActionShowing.trailing)
+          widget.onHorizontalEndDrag?.call();
         if (!whenTrailingActionShowing && hasLeadingAction) {
           _open(trailing: false);
         } else {
